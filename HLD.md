@@ -1,5 +1,12 @@
 ![HLD](HLD.png)
-##Services:
+
+#Assumptions:
+* Design is more focus in reducing latency.
+
+
+#HLD Detail
+
+##Services
 
 ###**Random Generation services**
 Random generation services creates random number and pushed to distributed set tobe utilised by creation services.
@@ -68,6 +75,55 @@ Zookeeper cluster uses to communicate between cluster and store the state.
   * store last generated random and use it during restart
   * If multiple service run, it will be used to pick different series of random 
   to avoid duplication of random
+
+
+#FAQ
+
+###**How does your system ensure that 2 URLs never map to the same shortened URL ?**
+
+**A:** 
+
+Allocating tiny url to long is responsibility of conversion service. Each service instance pop 
+pre-generated random from distributed set. 
+Distributed set ensure that same random does not allocate to two services. 
+
+It can be possible that service instance pop pre-generated tiny URL from distributed set but restart before using it. 
+In that case, tiny url is lost(does not allocate to any url).  
+
+###**How will you ensure the system is very low latency ?**
+
+**A:** This can be divided into multiple part.
+
+####Creating Tiny URL 
+Conversion service uses distributed in-memory set to fetch pre-generated tiny ULR to received URL. 
+Service does not perform network call(pop) for every received request. 
+Instead, It will perform batch pop operation to fetching bulk of tiny urls and store it in-memory for further use.
+
+####Storing Tiny URL
+Conversion service perform async call to key-value DB, 
+Queue will be used to populate data into respective DB eventually.
+i.e. Service stores actual URL and mapped tiny URL into queue, and it will eventually populate into key-value store.
+
+####Checking tiny URL is already generated for received URL
+LRU cached(backed by key-value store) will be used to check tiny URL is already generated for received URL. 
+If tiny URL already generated for received URL then it will be sent in response.
+
+####Handling latency during fetching actual URL from tiny URL operation
+Generated tiny URL fetched for LRU cached(backed by key-value store) which ensure low latency.
+
+###What will happen if the machine storing the ULR mapping dies ?
+Replication is enabled in all DB, Cache and in queue, 
+so that if any machine goes down service is not hamper and data does not loss.
+
+###How do you ensure your system is consistent ?
+DB support persistence storage, so once generated URL stored in DB, we can ensure that mapping never loss. 
+Also, System will take periodic back of DB and Queue, so that if disk is corrupted or destroyed,
+we can re-generate the DB state from back up or from queue.    
+
+###How do you make sure that your service never goes down?
+Service deploy as  active-active mode. Multiple instances of a service can be run simultaneously. 
+Also, Services deployed on kubernetes cluster or AWS which support auto-scaling and auto-restart.   
+
 
 
 
