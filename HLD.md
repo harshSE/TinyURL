@@ -15,7 +15,7 @@ Random generation services creates random number and pushed to distributed set t
 * On Start up, each random service picks digit/alphabets from which it starts generating value.
 Ex: let's say service start picks value 'A'. So it will start generating value starting for A incrementally. A, AA, AB, AZ,...,A9,.....,A999999999. This service periodically push the value to set in batch.
 * To avoid conflict in picking starting number or tracking generated numbers, 
-all service instance connected with zookeeper. From zookeepr, all service keep in sync.
+all service instance connected with zookeeper. From zookeeper, all service keep in sync.
 * Each service periodically writes last generated sequence in zookeeper before pushing values into distributed set.
 
 ###**Conversion Service**
