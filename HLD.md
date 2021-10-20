@@ -31,14 +31,49 @@ Query service uses this storage to fetch actual ulr by providing tiny url.
 * Creation service uses this storage in read-only mode only.
 * On Cache miss, Cache query Key-Value NoSQL DB to fetch actual url. 
 * It stores tiny URL created by conversion service to actual URL. 
-* It uses queue to load data.
+* It uses queue to load data, so there is eventual consistency in storing data  
+* Cache is LRU such that most frequently used key stored in cache.
  
 
-###Key-Value NoSQL DB (Actual URL -> Tiny URL)
+###Actual URL -> Tiny URL (LRU Cache + Key-Value NoSQL DB)
 Conversion service uses this DB to avoid regeneration of large ulr for which tiny url is already generated.
 
 * DB instance store actual url received in request to tiny URL.
-* It uses queue to load data.
+* It uses queue to load data, so there is eventual consistency in storing data
+* We assume that recently created ULR can be queried again, so that FIFO queue can be useful here. 
+
+### Distributed Set(Can we use queue over here, how can we ensure duplication then?)
+Set is used by conversion service to pop generated randoms by random generation service in batch.
+
+* Set will ensure that one random can not be pop by multiple conversation service.
+
+##Other Component
+
+### Load Balancer
+Load balancer has multiple responsibility.
+
+* Route request to appropriate service.
+* Load Balance requests between service instances.
+* Timeout the request is response is not received within time limit.
+* Does resend request required???
+
+### Queue
+Queue works as single source of truth. Both Key-Value NoSQL DB uses queue to populate data.
+
+###  Zookeeper Cluster
+Zookeeper cluster uses to communicate between cluster and store the state. 
+
+* This cluster used by Queue if we use kafka
+* Random Generation service uses kafka to 
+  * store last generated random and use it during restart
+  * If multiple service run, it will be used to pick different series of random 
+  to avoid duplication of random
+
+
+
+
+
+
 
 
 
