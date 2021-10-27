@@ -1,7 +1,14 @@
-![HLD](HLD.png)
+![HLD](Tiny URL HDL.jpg)
 
 #Assumptions:
 * Design is more focus in reducing latency.
+
+#Still not answered
+* What if user has created tiny url for url. Does not use for last 2 years(basically for long time) ?
+* Attack
+  * Continuously getting query for unknown tiny url
+    * This we can have another service which handle this part
+  * Bombarding the query from one server
 
 
 #HLD Detail
@@ -9,19 +16,18 @@
 ##Services
 
 ###**Random Generation services**
-Random generation services creates random number and pushed to distributed set tobe utilised by creation services.
+Random generation services creates random number and pushed to distributed set which is utilised by creation services.
 * Random is min 8 digit value contains A-Z,0-9.
-* Random services instance communicated with zookeeper server and listen for events.
-* On Start up, each random service picks digit/alphabets from which it starts generating value.
+* On Start up, Each random service picks digit/alphabets from which it starts generating value.
 Ex: let's say service start picks value 'A'. So it will start generating value starting for A incrementally. A, AA, AB, AZ,...,A9,.....,A999999999. This service periodically push the value to set in batch.
-* To avoid conflict in picking starting number or tracking generated numbers, 
+* To avoid conflict in picking number or tracking generated numbers, 
 all service instance connected with zookeeper. From zookeeper, all service keep in sync.
 * Each service periodically writes last generated sequence in zookeeper before pushing values into distributed set.
 
 ###**Conversion Service**
 Conversion service convert actual url into tiny url.
 * On Receiving request, Conversion service pop from the distributed set and map to tiny url. 
-* Created tiny URL put into distributed queue tobe utilized by key-value store NoSQL DB. 
+* Created tiny URL put into distributed queue which is utilized by key-value store NoSQL DB. 
 * Once service push the value into queue, service add the entry into distributed cache backed by key-value NoSQL DB, 
 where key is actual URL and value is tiny URL.
 * This cache will be used to avoid regeneration of tiny URL for received actual URL.
@@ -35,22 +41,22 @@ Query service provides actual URL for given tiny service.
 ###Tiny URL -> Actual URL (LRU Cache + Key-Value NoSQL DB)
 Query service uses this storage to fetch actual ulr by providing tiny url. 
 
-* Creation service uses this storage in read-only mode only.
-* On Cache miss, Cache query Key-Value NoSQL DB to fetch actual url. 
+* Query service uses this storage in read-only mode only.
+* On cache miss, Cache query to Key-Value NoSQL DB to fetch actual url. 
 * It stores tiny URL created by conversion service to actual URL. 
 * It uses queue to load data, so there is eventual consistency in storing data  
 * Cache is LRU such that most frequently used key stored in cache.
  
 
 ###Actual URL -> Tiny URL (LRU Cache + Key-Value NoSQL DB)
-Conversion service uses this DB to avoid regeneration of large ulr for which tiny url is already generated.
+Conversion service uses this DB to avoid regeneration of tiny ulr for actual url.
 
 * DB instance store actual url received in request to tiny URL.
 * It uses queue to load data, so there is eventual consistency in storing data
 * We assume that recently created ULR can be queried again, so that FIFO queue can be useful here. 
 
-### Distributed Set(Can we use queue over here, how can we ensure duplication then?)
-Set is used by conversion service to pop generated randoms by random generation service in batch.
+### Distributed Set
+Set is used by conversion service to pop generated randoms by tiny url generation service in batch.
 
 * Set will ensure that one random can not be pop by multiple conversation service.
 
@@ -83,7 +89,7 @@ Zookeeper cluster uses to communicate between cluster and store the state.
 
 **A:** 
 
-Allocating tiny url to long is responsibility of conversion service. Each service instance pop 
+Allocating tiny url to actual url is responsibility of conversion service. Each service instance pop 
 pre-generated random from distributed set. 
 Distributed set ensure that same random does not allocate to two services. 
 
