@@ -18,6 +18,8 @@ import static org.springframework.http.HttpHeaders.LINK;
 public class TinyControllerTest {
 
 
+  private static final Url ACTUAL_URL = new Url("https://test.com");
+  private static final Url TINY_URL = new Url("https://tinyurl.com/abc");
   private WebTestClient client;
 
   @MockBean
@@ -35,34 +37,29 @@ public class TinyControllerTest {
   @Test
   public void generateTinyURL() {
 
-    String url = "https://test.com";
-    String tinyUrl = "https://tinyurl.com/abc";
+    UrlConversionRequest request = new UrlConversionRequest(ACTUAL_URL);
 
-    UrlConversionRequest request = new UrlConversionRequest(url);
-
-    UrlConversionResponse response = new UrlConversionResponse(url, tinyUrl);
+    UrlConversionResponse response = new UrlConversionResponse(ACTUAL_URL, TINY_URL);
 
     when(service.convert(request)).thenReturn(Mono.just(response));
 
     client.post()
-        .bodyValue(url)
+        .bodyValue(ACTUAL_URL.value())
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CREATED)
         .expectBody(TinyUrlResponse.class).isEqualTo(
-            new TinyUrlResponse(url, tinyUrl)
+            new TinyUrlResponse(ACTUAL_URL.value(), TINY_URL.value())
         );
   }
 
   @Test
   public void returnActualUrlForTinyUrl() {
 
-    String url = "https://test.com";
-    String tinyUrl = "https://tinyurl.com/abc";
+    Url tinyUrlParam = new Url("abc");
+    UrlConversionRequest request = new UrlConversionRequest(tinyUrlParam);
 
-    UrlConversionRequest request = new UrlConversionRequest("abc");
-
-    UrlConversionResponse response = new UrlConversionResponse(url, tinyUrl);
+    UrlConversionResponse response = new UrlConversionResponse(ACTUAL_URL, tinyUrlParam);
 
     when(service.deConvert(request)).thenReturn(Mono.just(response));
 
@@ -71,7 +68,7 @@ public class TinyControllerTest {
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.MULTIPLE_CHOICES)
             .expectHeader()
-            .valueEquals(LINK, String.format("<%s>;rel=\"alternate\"", url));
+            .valueEquals(LINK, String.format("<%s>;rel=\"alternate\"", "https://test.com"));
   }
 
 }

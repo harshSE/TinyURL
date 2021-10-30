@@ -1,4 +1,4 @@
 package com.harshse.tinyurl;
 
-public record UrlConversionResponse(String actualUlr, String tinyUrl) {
+public record UrlConversionResponse(Url actualUlr, Url tinyUrl) {
 }

@@ -15,8 +15,10 @@ public class TinyUrlService {
     }
 
     public Mono<UrlConversionResponse> convert(UrlConversionRequest request) {
-        String tinyUrl = tinyUrlGenerator.generate(request.url());
-        return Mono.just(new UrlConversionResponse(request.url(), tinyUrl));
+        Url tinyUrl = tinyUrlGenerator.generate(request.url());
+        return tinyUrlRepository.putIfAbsent(new SaveRequest(request.url(), tinyUrl))
+            .map(url -> new UrlConversionResponse(request.url(), url));
+
     }
 
     public Mono<UrlConversionResponse> deConvert(UrlConversionRequest request) {
