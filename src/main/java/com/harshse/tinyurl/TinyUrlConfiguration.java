@@ -13,7 +13,7 @@ public class TinyUrlConfiguration {
     }
 
     @Bean
-    public TinyUrlService tinyUrlService(TinyUrlGenerator generator) {
-        return new TinyUrlService(generator, new TinyUrlRepository());
+    public TinyUrlService tinyUrlService(TinyUrlGenerator generator, TinyUrlRepository repository) {
+        return new TinyUrlService(generator, repository);
     }
 }

@@ -3,6 +3,8 @@ package com.harshse.tinyurl;
 
 import java.util.Objects;
 
+
+@SuppressWarnings("unused")
 public class TinyUrlResponse {
 
   private String actual;
@@ -47,5 +49,13 @@ public class TinyUrlResponse {
   @Override
   public int hashCode() {
     return Objects.hash(actual, tiny);
+  }
+
+  @Override
+  public String toString() {
+    return "TinyUrlResponse{" +
+        "actual='" + actual + '\'' +
+        ", tiny='" + tiny + '\'' +
+        '}';
   }
 }

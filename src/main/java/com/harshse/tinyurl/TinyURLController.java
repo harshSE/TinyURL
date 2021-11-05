@@ -3,6 +3,7 @@ package com.harshse.tinyurl;
 import static java.lang.String.format;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,10 +21,12 @@ public class TinyURLController {
 
 
   private final TinyUrlService service;
+  private final Url host;
 
   @Autowired
-  public TinyURLController(TinyUrlService service) {
+  public TinyURLController(TinyUrlService service, @Value("${tinyurl.host}") Url host) {
     this.service = service;
+    this.host = host;
   }
 
 
@@ -35,7 +38,7 @@ public class TinyURLController {
     Mono<UrlConversionResponse> response = service.convert(request);
 
     return response.map(
-        res -> new CreateUrlResponse(res.actualUlr().value(), res.tinyUrl().value()));
+        res -> new CreateUrlResponse(res.actualUlr().value(), host.value() + "/" + res.tinyUrl().value()));
   }
 
   @GetMapping("/{tinyUrl}")

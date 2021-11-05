@@ -1,0 +1,6 @@
+spring:
+  redis:
+    port: ${REDIS_PORT}
+
+tinyurl:
+  host: https://www.tinyurl.com
