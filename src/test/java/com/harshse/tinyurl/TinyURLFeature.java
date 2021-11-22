@@ -1,13 +1,5 @@
 package com.harshse.tinyurl;
 
-import static com.jayway.jsonpath.JsonPath.compile;
-import static com.jayway.jsonpath.JsonPath.parse;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +17,16 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+
+import static com.jayway.jsonpath.JsonPath.compile;
+import static com.jayway.jsonpath.JsonPath.parse;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -44,6 +46,7 @@ public class TinyURLFeature {
   @DynamicPropertySource
   public static void setProperties(DynamicPropertyRegistry registry) {
     registry.add("REDIS_PORT", redis::getFirstMappedPort);
+    registry.add("tinyurl.host", () -> "https://www.tinyurl.com");
   }
 
   @BeforeEach
@@ -80,10 +83,10 @@ public class TinyURLFeature {
         .blockOptional(Duration.ofMillis(1000));
 
     assertThat(getResponse).map(ResponseEntity::getStatusCode)
-        .hasValue(HttpStatus.MULTIPLE_CHOICES);
+        .hasValue(HttpStatus.FOUND);
     assertThat(getResponse).map(ResponseEntity::getHeaders)
-        .map(header -> header.get(HttpHeaders.LINK))
-        .hasValue(Arrays.asList(String.format("<%s>;rel=\"alternate\"", url)));
+        .map(header -> header.get(HttpHeaders.LOCATION))
+        .hasValue(Collections.singletonList(url));
   }
 
 }

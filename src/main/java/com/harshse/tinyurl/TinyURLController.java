@@ -1,7 +1,5 @@
 package com.harshse.tinyurl;
 
-import static java.lang.String.format;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -47,11 +45,8 @@ public class TinyURLController {
 
     return service.deConvert(new UrlConversionRequest(new Url(tinyUrl)))
         .map(deConversionResponse -> ResponseEntity.
-            status(HttpStatus.MULTIPLE_CHOICES).
-            header(HttpHeaders.LINK,
-                format("<%s>;rel=\"alternate\"", deConversionResponse.actualUlr().value()))
+            status(HttpStatus.FOUND).
+            header(HttpHeaders.LOCATION, deConversionResponse.actualUlr().value())
             .build());
   }
-
-
 }

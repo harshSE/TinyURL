@@ -14,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.LINK;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @WebFluxTest(TinyURLController.class)
 public class TinyControllerTest {
@@ -74,9 +74,9 @@ public class TinyControllerTest {
     client.get().uri("/abc")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isEqualTo(HttpStatus.MULTIPLE_CHOICES)
+            .expectStatus().isEqualTo(HttpStatus.FOUND)
             .expectHeader()
-            .valueEquals(LINK, String.format("<%s>;rel=\"alternate\"", "https://test.com"));
+            .valueEquals(LOCATION, "https://test.com");
   }
 
 }
