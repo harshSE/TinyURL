@@ -4,6 +4,8 @@ services:
     expose:
       - "6379"
       - "16379"
+    ports:
+      - "6379:6379"
     volumes:
-      - "/home/harsh/TinyURL/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "/mnt/d/opensource/TinyURL/redis.conf:/usr/local/etc/redis/redis.conf"
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]

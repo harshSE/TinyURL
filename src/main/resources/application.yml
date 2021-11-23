@@ -3,4 +3,4 @@ spring:
     port: ${REDIS_PORT}
 
 tinyurl:
-  host: https://www.tinyurl.com
+  host: https://localhost:8080
