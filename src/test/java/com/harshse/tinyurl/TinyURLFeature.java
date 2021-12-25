@@ -45,7 +45,7 @@ public class TinyURLFeature {
 
   @DynamicPropertySource
   public static void setProperties(DynamicPropertyRegistry registry) {
-    registry.add("REDIS_PORT", redis::getFirstMappedPort);
+    registry.add("spring.redis.port", redis::getFirstMappedPort);
     registry.add("tinyurl.host", () -> "https://www.tinyurl.com");
   }
 
@@ -53,6 +53,10 @@ public class TinyURLFeature {
   public void setUp() {
     client = WebClient.create(String.format("http://localhost:%s", port));
   }
+
+  /*
+
+   */
 
 
   @Test

@@ -1,6 +1,8 @@
 spring:
   redis:
-    port: ${REDIS_PORT}
+    cluster:
+      nodes: 10.0.0.11:7001,10.0.0.12:7002,10.0.0.13:7003,10.0.0.14:7004,10.0.0.15:7005,10.0.0.16:7006
+      max-redirects: 3
 
 tinyurl:
   host: https://localhost:8080

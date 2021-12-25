@@ -1,0 +1,6 @@
+spring:
+  redis:
+    port:
+
+tinyurl:
+  host: https://localhost:8080
